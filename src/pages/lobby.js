@@ -12,13 +12,27 @@ code: null
     this.CreateRoom=this.CreateRoom.bind(this);
 }
 
-CreateRoom(){
+ async CreateRoom(){
     const randomcode=Math.floor(Math.random() * 100000) + 1 ;
 this.setState({
     code: randomcode
 }
+
 );
-this.props.history.push(`/playarea/${randomcode}`)
+const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        id: 0,
+        name: "abdullah",
+        active: true,
+        room: randomcode
+      })
+};
+const response = await fetch('https://localhost:5001/api/user', requestOptions);
+const data = await response.json();
+// console.log(data);
+this.props.history.push(`/playarea/${data.room}`)
 
 }
 

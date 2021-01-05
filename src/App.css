@@ -28,77 +28,7 @@
 .App-link {
   color: #61dafb;
 }
-.Player1{
-  height: 30vh;
-  width: 30vh;
-  display: flex;
-  margin-top: 20px;
-  font-size: 3vh;
-  align-items: center;
-  justify-content: center;
-  padding-left: auto;
-  background-color: rgb(94, 79, 230);
-  color: white;
-  border-radius: 10px;
-  position:fixed ;
-  left:160vh;
-  
-}
-.Player2{
-  height: 30vh;
-  width: 30vh;
-  display: flex;
-  margin-top: 20px;
-  font-size: 3vh;
-  align-items: center;
-  justify-content: center;
-  padding-left: auto;
-  background-color: rgb(94, 79, 230);
-  color: white;
-  border-radius: 10px;
-  position:fixed ;
-  margin-left: 2vh;
-  top:10vh;
-  
-}
-.Player3{
-  height: 30vh;
-  width: 30vh;
-  display: flex;
-  margin-top: 20px;
-  font-size: 3vh;
-  align-items: center;
-  justify-content: center;
-  padding-left: auto;
-  background-color: rgb(94, 79, 230);
-  color: white;
-  border-radius: 10px;
-  position:fixed ;
-  margin-left: 10px;
-  bottom:10vh;
-  
-}
-.Player4{
-  height: 30vh;
-  width: 30vh;
-  display: flex;
-  margin-top: 20px;
-  font-size: 3vh;
-  align-items: center;
-  justify-content: center;
-  padding-left: auto;
-  background-color: rgb(94, 79, 230);
-  color: white;
-  border-radius: 10px;
-  position:fixed ;
-  margin-left: 10px;
-  bottom:10vh;
-  left: 160vh;
-}
-.count{
-  position:fixed;
-  left:80vh ;
-}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
