@@ -30,7 +30,7 @@ function PublicRoute({ component: Component, authenticated, ...rest }) {
       {...rest}
       render={(props) => authenticated === false
         ? <Component {...props} />
-        : <Redirect to='/lobby' />}
+        : <Redirect to='/playarea' />}
     />
   )
 }
@@ -72,7 +72,7 @@ render() {
               <Switch>
                   <Route exact path="/" component={Home} />
                   <PrivateRoute
-                      path="/playarea/:code"
+                      path="/playarea"
                       authenticated={this.state.authenticated}
                       component={Playarea}
                   />
