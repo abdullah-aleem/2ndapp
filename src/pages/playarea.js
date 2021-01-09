@@ -29,6 +29,7 @@ export default class Playarea extends Component {
             joincode: null,
             showRoom: null,
             identity: {},
+            player: [{}]
 
         };
         this.MakeCards = this.MakeCards.bind(this);
@@ -37,6 +38,8 @@ export default class Playarea extends Component {
         this.CreateRoom = this.CreateRoom.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.Findactiveplayer = this.Findactiveplayer.bind(this);
+        this.whichCardsToShow=this.whichCardsToShow.bind(this);
     }
 
     mapToCards(value) {
@@ -144,30 +147,44 @@ export default class Playarea extends Component {
         const randomcode = Math.floor(Math.random() * 100000) + 1;
         await this.setState({
             code: randomcode,
-            identity: { name: 'kaleem', sendcode: randomcode, id: 1 },
-            showRoom: true
+            identity: { name: this.state.user.email, sendcode: randomcode, id: 1 },
+
         }
 
         );
         socket.emit("Requesttojoinroom", this.state.identity);
-
-
-        // const requestOptions = {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify({
-        //         id: 0,
-        //         name: "abdullah",
-        //         active: true,
-        //         room: randomcode
-        //     })
-        // };
-        // const response = await fetch('https://localhost:5001/api/user', requestOptions);
-        // const data = await response.json();
-        // console.log(data);
-
+        socket.on("FromAPI", (data, info, cards) => {
+            this.setState({
+                showRoom: data,
+                identity: info,
+                cards: cards,
+                firstplayer: cards.slice(0, 13),
+                secondplayer: cards.slice(13, 26),
+                thirdplayer: cards.slice(26, 39),
+                fourthplayer: cards.slice(39, 52),
+            });
+            console.log(cards);
+        }
+        )
+        this.Findactiveplayer(this.state.identity.id);
 
     }
+    // const requestOptions = {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify({
+    //         id: 0,
+    //         name: "abdullah",
+    //         active: true,
+    //         room: randomcode
+    //     })
+    // };
+    // const response = await fetch('https://localhost:5001/api/user', requestOptions);
+    // const data = await response.json();
+    // console.log(data);
+
+
+
 
 
     handleChange(event) {
@@ -179,30 +196,110 @@ export default class Playarea extends Component {
         event.preventDefault();
         if (!this.state.joincode) { }
         else {
-           await this.setState({identity:{name:'kaleem',sendcode:this.state.joincode,id:null}})
+            await this.setState({ identity: { name: this.state.user, sendcode: this.state.joincode, id: null } })
             //connect with server and send him the code to the room the server will check the people in the room and then rply according
             socket.emit("Requesttojoinroom", this.state.identity)
-            socket.on("FromAPI", (data) => {
+             socket.on("FromAPI", (data, info, cards) => {
                 console.log(data);
                 this.setState({
                     showRoom: data,
-                    })
+                    identity: info,
+                    cards: cards,
+                    firstplayer: cards.slice(0, 13),
+                    secondplayer: cards.slice(13, 26),
+                    thirdplayer: cards.slice(26, 39),
+                    fourthplayer: cards.slice(39, 52),
+                })
+            console.log(cards);
             }
+
+
             )
+           
+
+        }
+
+    }
+     Findactiveplayer(key) {
+        switch (key) {
+            case 1:
+            this.setState({ player: this.state.firstplayer })
+                break;
+            case 2:
+            this.setState({ player: this.state.secondplayer })
+                break;
+            case 3:
+             this.setState({ player: this.state.thirdplayer })
+                break;
+            case 4:
+             this.setState({ player: this.state.fourthplayer })
+                break;
+            default:
+                break;
         }
     }
+whichCardsToShow()
+{ 
+    if(this.state.identity.id===1){
 
+    const cardsItems1 =
+
+    this.state.firstplayer.map((card) =>
+
+        <div class="card" onClick={() => { this.playCard(card) }}>
+            <div class="value" card-value={card.value}>{card.title}
+            </div>
+            <div className={card.class}>
+            </div>
+        </div>
+    );
+    console.log(this.state.firstplayer);
+    return cardsItems1;
+}else if(this.state.identity.id===2){
+    const cardsItems2 =
+
+    this.state.secondplayer.map((card) =>
+
+        <div class="card" onClick={() => { this.playCard(card) }}>
+            <div class="value" card-value={card.value}>{card.title}
+            </div>
+            <div className={card.class}>
+            </div>
+        </div>
+    );
+    return cardsItems2;
+}else if(this.state.identity.id===3){
+    const cardsItems3 =
+
+    this.state.thirdplayer.map((card) =>
+
+        <div class="card" onClick={() => { this.playCard(card) }}>
+            <div class="value" card-value={card.value}>{card.title}
+            </div>
+            <div className={card.class}>
+            </div>
+        </div>
+    );
+    return cardsItems3;
+}else if(this.state.identity.id===4){
+    const cardsItems4 =
+
+    this.state.fourthplayer.map((card) =>
+
+        <div class="card" onClick={() => { this.playCard(card) }}>
+            <div class="value" card-value={card.value}>{card.title}
+            </div>
+            <div className={card.class}>
+            </div>
+        </div>
+    );
+    return cardsItems4;
+}
+}
     render() {
 
-        const cardsItems = this.state.firstplayer.map((card) =>
+       const cardsShown= this.whichCardsToShow()
 
-            <div class="card" onClick={() => { this.playCard(card) }}>
-                <div class="value" card-value={card.value}>{card.title}
-                </div>
-                <div className={card.class}>
-                </div>
-            </div>
-        );
         // displayCards(){
         //     cardsItems.map()
         // }
@@ -247,7 +344,7 @@ export default class Playarea extends Component {
                         </div>
                     </nav>
                     <div>
-                        {this.state.user.email}
+                        {this.state.identity.sendcode}
                     </div>
                     <div className='count'>
                         <button type="button" class=" mb-3 btn btn-success">
@@ -265,7 +362,7 @@ export default class Playarea extends Component {
 
                                 </h5>
                                 <p class="card-text">
-                                    {this.state.user.email}
+                                    {this.state.identity.id === 1 ? this.state.user.email : 'cards Comming'}
                                 </p>
                             </div>
                         </div>
@@ -285,7 +382,8 @@ export default class Playarea extends Component {
                                 <h5 class="card-title">
 
                                 </h5>
-                                <p class="card-text">cards coming...</p>
+                                <p class="card-text">{this.state.identity.id === 2 ? this.state.user.email : 'cards Comming'}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -297,7 +395,8 @@ export default class Playarea extends Component {
                                 <h5 class="card-title">
 
                                 </h5>
-                                <p class="card-text">cards coming...</p>
+                                <p class="card-text">{this.state.identity.id === 3 ? this.state.user.email : 'cards Comming'}
+                                </p>
                             </div>
                         </div>
                         <div class="col-4 mb-3"></div>
@@ -308,13 +407,13 @@ export default class Playarea extends Component {
                                 <h5 class="card-title">
 
                                 </h5>
-                                <p class="card-text">cards coming...</p>
+                                <p class="card-text">{this.state.identity.id === 4 ? this.state.user.email : 'cards Comming'}</p>
                             </div>
                         </div>
                     </div>
 
                     <div className="deck">
-                        {cardsItems}
+                        {cardsShown}
                     </div>
                 </div >
 
