@@ -25,99 +25,23 @@ export default class Playarea extends Component {
             thirdplayer: [{}],
             forthplayer: [{}],
             cards: Array(51).fill({ null: null }),
-            code: null,
+            
             joincode: null,
             showRoom: null,
             identity: {},
             player: [{}]
 
         };
-        this.MakeCards = this.MakeCards.bind(this);
-        this.Showfirstplayercards = this.Showfirstplayercards.bind(this);
+       
         this.playCard = this.playCard.bind(this);
         this.CreateRoom = this.CreateRoom.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        this.Findactiveplayer = this.Findactiveplayer.bind(this);
         this.whichCardsToShow=this.whichCardsToShow.bind(this);
     }
 
-    mapToCards(value) {
-        switch (value) {
-            case 11:
-                return 'J';
-
-            case 12:
-                return 'Q';
-
-            case 13:
-                return 'K';
-
-            case 14:
-                return 'A';
-
-            default:
-                return value;
-
-        }
-    }
-    MakeCards() {
-        let Tcards = []
-
-        //    const cards={};
-
-        for (let count = 0; count < 13; count++) {
-            Tcards[count] = {
-                name: "Spades",
-                title: this.mapToCards(count + 2),
-                value: count + 2,
-                class: "suit Spade"
-            }
-
-        }
-        for (let count = 13; count < 26; count++) {
-            Tcards[count] = {
-                name: " Diamonds",
-                title: this.mapToCards(count - 11),
-                value: count - 11,
-                class: "suit diamonds"
-            }
-
-        }
-        for (let count = 26; count < 39; count++) {
-            Tcards[count] = {
-                name: "Heart",
-                title: this.mapToCards(count - 24),
-                value: count - 24,
-                class: "suit hearts"
-            }
-
-        }
-        for (let count = 39; count < 52; count++) {
-            Tcards[count] = {
-                name: "Clubs",
-                title: this.mapToCards(count - 37),
-                value: count - 37,
-                class: "suit clubs"
-            }
-
-        }
-
-
-
-        const shuffled = Tcards.sort(() => 0.5 - Math.random());
-
-        this.setState({
-            firstplayer: shuffled.slice(0, 13),
-            secondplayer: shuffled.slice(13, 26),
-            thirdplayer: shuffled.slice(26, 39),
-            fourthplayer: shuffled.slice(39, 52),
-            cards: shuffled
-        })
-        console.log(shuffled);
-        return;
-
-    }
+    
+   
     playCard(card) {
 
 
@@ -137,12 +61,7 @@ export default class Playarea extends Component {
     }
 
 
-    Showfirstplayercards() {
-        this.setState({
-            firstplayer: this.state.firstplayer
-        })
-        console.log(this.state.firstplayer);
-    }
+    
     async CreateRoom() {
         const randomcode = Math.floor(Math.random() * 100000) + 1;
         await this.setState({
@@ -157,7 +76,7 @@ export default class Playarea extends Component {
             this.setState({
                 showRoom: data,
                 identity: info,
-                cards: cards,
+                
                 firstplayer: cards.slice(0, 13),
                 secondplayer: cards.slice(13, 26),
                 thirdplayer: cards.slice(26, 39),
@@ -169,24 +88,7 @@ export default class Playarea extends Component {
         this.Findactiveplayer(this.state.identity.id);
 
     }
-    // const requestOptions = {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //         id: 0,
-    //         name: "abdullah",
-    //         active: true,
-    //         room: randomcode
-    //     })
-    // };
-    // const response = await fetch('https://localhost:5001/api/user', requestOptions);
-    // const data = await response.json();
-    // console.log(data);
-
-
-
-
-
+    
     handleChange(event) {
         this.setState({
             joincode: parseInt(event.target.value),
@@ -199,53 +101,36 @@ export default class Playarea extends Component {
             await this.setState({ identity: { name: this.state.user, sendcode: this.state.joincode, id: null } })
             //connect with server and send him the code to the room the server will check the people in the room and then rply according
             socket.emit("Requesttojoinroom", this.state.identity)
-             socket.on("FromAPI", (data, info, cards) => {
+            socket.on("FromAPI", (data, info, cards) => {
                 console.log(data);
                 this.setState({
                     showRoom: data,
                     identity: info,
-                    cards: cards,
+                    
                     firstplayer: cards.slice(0, 13),
                     secondplayer: cards.slice(13, 26),
                     thirdplayer: cards.slice(26, 39),
                     fourthplayer: cards.slice(39, 52),
                 })
-            console.log(cards);
+                console.log(cards);
             }
-
+            
 
             )
            
 
         }
-
+        
     }
-     Findactiveplayer(key) {
-        switch (key) {
-            case 1:
-            this.setState({ player: this.state.firstplayer })
-                break;
-            case 2:
-            this.setState({ player: this.state.secondplayer })
-                break;
-            case 3:
-             this.setState({ player: this.state.thirdplayer })
-                break;
-            case 4:
-             this.setState({ player: this.state.fourthplayer })
-                break;
-            default:
-                break;
-        }
-    }
+    
 whichCardsToShow()
 { 
     if(this.state.identity.id===1){
 
-    const cardsItems1 =
-
-    this.state.firstplayer.map((card) =>
-
+        const cardsItems1 =
+        
+        this.state.firstplayer.map((card) =>
+        
         <div class="card" onClick={() => { this.playCard(card) }}>
             <div class="value" card-value={card.value}>{card.title}
             </div>
@@ -257,7 +142,7 @@ whichCardsToShow()
     return cardsItems1;
 }else if(this.state.identity.id===2){
     const cardsItems2 =
-
+    
     this.state.secondplayer.map((card) =>
 
         <div class="card" onClick={() => { this.playCard(card) }}>
@@ -270,10 +155,10 @@ whichCardsToShow()
     return cardsItems2;
 }else if(this.state.identity.id===3){
     const cardsItems3 =
-
+    
     this.state.thirdplayer.map((card) =>
-
-        <div class="card" onClick={() => { this.playCard(card) }}>
+    
+    <div class="card" onClick={() => { this.playCard(card) }}>
             <div class="value" card-value={card.value}>{card.title}
             </div>
             <div className={card.class}>
@@ -283,9 +168,9 @@ whichCardsToShow()
     return cardsItems3;
 }else if(this.state.identity.id===4){
     const cardsItems4 =
-
+    
     this.state.fourthplayer.map((card) =>
-
+    
         <div class="card" onClick={() => { this.playCard(card) }}>
             <div class="value" card-value={card.value}>{card.title}
             </div>
@@ -296,14 +181,11 @@ whichCardsToShow()
     return cardsItems4;
 }
 }
-    render() {
-
-       const cardsShown= this.whichCardsToShow()
-
-        // displayCards(){
-        //     cardsItems.map()
-        // }
-        return (
+render() {
+    
+    const cardsShown= this.whichCardsToShow()
+    
+    return (
             <div>
 
                 <div style={{ display: !this.state.showRoom ? 'block' : 'none' }}>
@@ -336,7 +218,7 @@ whichCardsToShow()
                         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                             <div class="navbar-nav">
                                 <a class="nav-item nav-link active" href="#">Rang card game</a>
-                                <a class="nav-item nav-link" href="#" onClick={this.MakeCards}>Distribute</a>
+                                <a class="nav-item nav-link" href="#" >Distribute</a>
                                 <a class="nav-item nav-link" href="#">declare winner</a>
                                 <a class="nav-item nav-link" href="#">Endgame</a>
                                 <a class="nav-item nav-link" href="#">Choose 1 player</a>
@@ -421,6 +303,20 @@ whichCardsToShow()
             </div>
         );
     }
-
+    
 }
 
+
+// const requestOptions = {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({
+//         id: 0,
+//         name: "abdullah",
+//         active: true,
+//         room: randomcode
+//     })
+// };
+// const response = await fetch('https://localhost:5001/api/user', requestOptions);
+// const data = await response.json();
+// console.log(data);
