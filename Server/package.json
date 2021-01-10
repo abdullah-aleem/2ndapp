@@ -1,0 +1,25 @@
+{
+  "name": "rangserver",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "abdullahaleem",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^3.0.5"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdullah-aleem/2ndapp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abdullah-aleem/2ndapp/issues"
+  },
+  "homepage": "https://github.com/abdullah-aleem/2ndapp#readme",
+  "description": ""
+}
