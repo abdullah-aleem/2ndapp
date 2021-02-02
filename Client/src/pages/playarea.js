@@ -17,78 +17,149 @@ export default class Playarea extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            active: null,
+            activePlayer: null,
+            active1: null,
+            active2: null,
+            active3: null,
+            active4: null,
             error: null,
             user: auth().currentUser,
-            firstplayer: [{}],
-            Secondplayer: [{}],
-            thirdplayer: [{}],
-            forthplayer: [{}],
-            cards: Array(51).fill({ null: null }),
-            
+            myCards: [{}],
+            allUsers: [{}],
             joincode: null,
             showRoom: null,
             identity: {},
-            player: [{}]
+            players: null,
+            turn:false
 
         };
-       
-        this.playCard = this.playCard.bind(this);
+
         this.CreateRoom = this.CreateRoom.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
-        this.whichCardsToShow=this.whichCardsToShow.bind(this);
+        this.displayPlayedCards = this.displayPlayedCards.bind(this);
+
     }
 
-    
-   
+
+
     playCard(card) {
-
-
-
-        let deck1 = this.state.firstplayer;
-        let index = deck1.indexOf(card);
-        if (index !== -1) {
-            deck1.splice(index, 1);
-            this.setState({
-                firstplayer: deck1,
-                active: card
-            });
-
-
+        if (this.state.turn){
+        socket.emit('cardPlayed', card, this.state.activePlayer);
+        let temCards = this.state.myCards;
+        temCards.splice(temCards.indexOf(card), 1)
+        this.setState({ myCards: temCards,turn:false });
         }
-
+        else{return;}
     }
 
 
-    
+
     async CreateRoom() {
         const randomcode = Math.floor(Math.random() * 100000) + 1;
         await this.setState({
             code: randomcode,
-            identity: { name: this.state.user.email, sendcode: randomcode, id: 1 },
+            identity: { name: this.state.user.email, sendcode: randomcode, id: null },
 
         }
 
         );
         socket.emit("Requesttojoinroom", this.state.identity);
-        socket.on("FromAPI", (data, info, cards) => {
+        socket.on('Youjoined', (identity, users) => {
+            console.log(users);
             this.setState({
-                showRoom: data,
-                identity: info,
-                
-                firstplayer: cards.slice(0, 13),
-                secondplayer: cards.slice(13, 26),
-                thirdplayer: cards.slice(26, 39),
-                fourthplayer: cards.slice(39, 52),
+                players: identity.totalPlayers,
+                showRoom: identity.showRoom,
+                allUsers: users,
+                identity: { user: identity.name, sendcode: identity.sendcode, id: identity.id },
+                activePlayer: identity.totalPlayers,
+
             });
-            console.log(cards);
+
+        }
+
+
+        )
+        socket.on('NewPlayerJoined', (player, showRoom, newPlayer) => {
+            console.log(newPlayer);
+
+            this.setState({
+                players: player,
+                showRoom: showRoom,
+                // identity: info,
+                allUsers: newPlayer,
+
+            });
+            console.log(player);
         }
         )
-        
+        socket.on('yourCards', (cards,turn) => {
+            console.log(cards);
+            this.setState({ myCards: cards, turn:turn })
+        })
+        socket.on('cardPlayedBy', (card, position) => {
+
+            this.displayPlayedCards(card, position);
+        })
+        socket.on('nextTurn',turn=>{this.setState({turn:turn})})
+        socket.on('yourTurn',turn=>{
+            console.log("your turn function")
+            
+            this.setState({turn:turn})})
+    
+
 
     }
-    
+    displayPlayedCards(card, by) {
+        switch (by) {
+            case 1:
+                this.setState({
+                    active1: <div class="card" >
+                        <div class="value" card-value={card.value}>{card.title}
+                        </div>
+                        <div className={card.class}>
+                        </div>
+                    </div>
+                })
+                break;
+
+            case 2:
+                this.setState({
+                    active2: <div class="card" >
+                        <div class="value" card-value={card.value}>{card.title}
+                        </div>
+                        <div className={card.class}>
+                        </div>
+                    </div>
+                })
+                break;
+
+            case 3:
+                this.setState({
+                    active3: <div class="card" >
+                        <div class="value" card-value={card.value}>{card.title}
+                        </div>
+                        <div className={card.class}>
+                        </div>
+                    </div>
+                })
+                break;
+
+            case 4:
+                this.setState({
+                    active4: <div class="card" >
+                        <div class="value" card-value={card.value}>{card.title}
+                        </div>
+                        <div className={card.class}>
+                        </div>
+                    </div>
+                })
+                break;
+
+            default:
+                break;
+        }
+    }
     handleChange(event) {
         this.setState({
             joincode: parseInt(event.target.value),
@@ -98,94 +169,72 @@ export default class Playarea extends Component {
         event.preventDefault();
         if (!this.state.joincode) { }
         else {
-            await this.setState({ identity: { name: this.state.user, sendcode: this.state.joincode, id: null } })
+            await this.setState({ identity: { name: this.state.user.email, sendcode: this.state.joincode, id: null } })
             //connect with server and send him the code to the room the server will check the people in the room and then rply according
             socket.emit("Requesttojoinroom", this.state.identity)
-            socket.on("FromAPI", (data, info, cards) => {
-                console.log(data);
+            socket.on('Youjoined', (identity, users) => {
+                console.log(users);
                 this.setState({
-                    showRoom: data,
-                    identity: info,
-                    
-                    firstplayer: cards.slice(0, 13),
-                    secondplayer: cards.slice(13, 26),
-                    thirdplayer: cards.slice(26, 39),
-                    fourthplayer: cards.slice(39, 52),
-                })
-                console.log(cards);
+                    players: identity.totalPlayers,
+                    showRoom: identity.showRoom,
+                    allUsers: users,
+                    identity: { user: identity.name, sendcode: identity.sendcode, id: identity.id },
+                    activePlayer: identity.totalPlayers,
+
+
+                });
             }
-            
-
             )
-           
+            socket.on('NewPlayerJoined', (player, showRoom, newPlayer) => {
+                console.log(newPlayer);
 
+
+                this.setState({
+
+                    players: player,
+                    allUsers: newPlayer,
+                    showRoom: showRoom,
+                    // identity: info,
+
+
+                });
+                console.log(player);
+                console.log(showRoom);
+            }
+            )
+            socket.on('yourCards', (cards,turn) => {
+                console.log(cards);
+                this.setState({ myCards: cards,turn:turn })
+            })
+
+            socket.on('cardPlayedBy', (card, position) => {
+                this.displayPlayedCards(card, position);
+
+            })
+            socket.on('nextTurn',turn=>{
+                console.log("next turn function")
+                this.setState({turn:turn})})
+            socket.on('yourTurn',turn=>{
+                console.log("your turn function")
+                
+                this.setState({turn:turn})})
         }
-        
+
     }
-    
-whichCardsToShow()
-{ 
-    if(this.state.identity.id===1){
 
-        const cardsItems1 =
-        
-        this.state.firstplayer.map((card) =>
-        
-        <div class="card" onClick={() => { this.playCard(card) }}>
-            <div class="value" card-value={card.value}>{card.title}
-            </div>
-            <div className={card.class}>
-            </div>
-        </div>
-    );
-    console.log(this.state.firstplayer);
-    return cardsItems1;
-}else if(this.state.identity.id===2){
-    const cardsItems2 =
-    
-    this.state.secondplayer.map((card) =>
+    render() {
 
-        <div class="card" onClick={() => { this.playCard(card) }}>
-            <div class="value" card-value={card.value}>{card.title}
+        const showCards = this.state.myCards.map((card) =>
+
+            <div class="card" onClick={() => { this.playCard(card) }}>
+                <div class="value" card-value={card.value}>{card.title}
+                </div>
+                <div className={card.class}>
+                </div>
             </div>
-            <div className={card.class}>
-            </div>
-        </div>
-    );
-    return cardsItems2;
-}else if(this.state.identity.id===3){
-    const cardsItems3 =
-    
-    this.state.thirdplayer.map((card) =>
-    
-    <div class="card" onClick={() => { this.playCard(card) }}>
-            <div class="value" card-value={card.value}>{card.title}
-            </div>
-            <div className={card.class}>
-            </div>
-        </div>
-    );
-    return cardsItems3;
-}else if(this.state.identity.id===4){
-    const cardsItems4 =
-    
-    this.state.fourthplayer.map((card) =>
-    
-        <div class="card" onClick={() => { this.playCard(card) }}>
-            <div class="value" card-value={card.value}>{card.title}
-            </div>
-            <div className={card.class}>
-            </div>
-        </div>
-    );
-    return cardsItems4;
-}
-}
-render() {
-    
-    const cardsShown= this.whichCardsToShow()
-    
-    return (
+        );
+
+        return (
             <div>
 
                 <div style={{ display: !this.state.showRoom ? 'block' : 'none' }}>
@@ -226,11 +275,11 @@ render() {
                         </div>
                     </nav>
                     <div>
-                        {this.state.identity.sendcode}
+                        {this.state.code}{this.state.joincode}
                     </div>
                     <div className='count'>
                         <button type="button" class=" mb-3 btn btn-success">
-                            Players online: <span class="badge badge-light"> {this.state.count}</span>
+                            Players online: <span class="badge badge-light"> {this.state.players}</span>
                         </button>
                     </div>
 
@@ -244,17 +293,21 @@ render() {
 
                                 </h5>
                                 <p class="card-text">
-                                    {this.state.identity.id === 1 ? this.state.user.email : 'cards Comming'}
+                                    {this.state.allUsers[0] != null ? this.state.allUsers[0].name : ''}
                                 </p>
                             </div>
                         </div>
                         <div class="deck">
-                            <div class="card" >
-                                <div class="value">{this.state.active != null ? this.state.active.title : ''}
-                                </div>
-                                <div className={this.state.active != null ? this.state.active.class : ''}>
-                                </div>
-                            </div>
+                            {this.state.active1}
+                        </div>
+                        <div class="deck">
+                            {this.state.active2}
+                        </div>
+                        <div class="deck">
+                            {this.state.active3}
+                        </div>
+                        <div class="deck">
+                            {this.state.active4}
                         </div>
                         <div class="col-4 mb-3"></div>
                         <div class="col-4 mb-3"></div>
@@ -262,9 +315,8 @@ render() {
                             <div class="card-header">Player 2</div>
                             <div class="card-body">
                                 <h5 class="card-title">
-
                                 </h5>
-                                <p class="card-text">{this.state.identity.id === 2 ? this.state.user.email : 'cards Comming'}
+                                <p class="card-text"> {this.state.allUsers[1] != null ? this.state.allUsers[1].name : ''}
                                 </p>
                             </div>
                         </div>
@@ -277,7 +329,9 @@ render() {
                                 <h5 class="card-title">
 
                                 </h5>
-                                <p class="card-text">{this.state.identity.id === 3 ? this.state.user.email : 'cards Comming'}
+                                <p class="card-text">{this.state.allUsers[2] != null ? this.state.allUsers[2].name : ''}
+
+
                                 </p>
                             </div>
                         </div>
@@ -289,13 +343,14 @@ render() {
                                 <h5 class="card-title">
 
                                 </h5>
-                                <p class="card-text">{this.state.identity.id === 4 ? this.state.user.email : 'cards Comming'}</p>
+                                <p class="card-text"> {this.state.allUsers[3] != null ? this.state.allUsers[3].name : ''}
+                                </p>
                             </div>
                         </div>
                     </div>
 
                     <div className="deck">
-                        {cardsShown}
+                        {showCards}
                     </div>
                 </div >
 
@@ -303,7 +358,7 @@ render() {
             </div>
         );
     }
-    
+
 }
 
 
