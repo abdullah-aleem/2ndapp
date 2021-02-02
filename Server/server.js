@@ -4,6 +4,7 @@ const socketIo = require("socket.io");
 const game = require('./SettingGameUp');
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
+const { isNullOrUndefined } = require("util");
 const app = express();
 app.use(index);
 const server = http.createServer(app);
@@ -59,8 +60,9 @@ io.on("connection", (socket) => {
     }
     socket.on('cardPlayed', (card, playedBy) => {
       currentcards[playedBy - 1] = card;
-      console.log(currentcards);
-      if (!(currentcards.length > 3)) {
+      console.log('length of cards ',currentcards.length);
+console.log('index of undefined', currentcards.indexOf(undefined))
+      if (!(currentcards.length > 3) || !currentcards[0]||!currentcards[1]||!currentcards[2]) {
         socket.emit('cardPlayedBy', card, playedBy);
         socket.to(currentUsers[0].room).emit('cardPlayedBy', card, playedBy);
 
