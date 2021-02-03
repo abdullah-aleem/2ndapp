@@ -12,6 +12,7 @@ var connectionOptions = {
     "timeout": 10000,                  //before connect_error and connect_timeout are emitted.
     "transports": ["websocket"]
 };
+var showCards;
 const socket = socketIOClient(ENDPOINT, connectionOptions);
 export default class Playarea extends Component {
     constructor(props) {
@@ -30,7 +31,8 @@ export default class Playarea extends Component {
             showRoom: null,
             identity: {},
             players: null,
-            turn:false
+            turn: false,
+            rangSelected: true
 
         };
 
@@ -44,13 +46,16 @@ export default class Playarea extends Component {
 
 
     playCard(card) {
-        if (this.state.turn){
-        socket.emit('cardPlayed', card, this.state.activePlayer);
-        let temCards = this.state.myCards;
-        temCards.splice(temCards.indexOf(card), 1)
-        this.setState({ myCards: temCards,turn:false });
+        if (this.state.turn && this.state.rangSelected) {
+            socket.emit('cardPlayed', card, this.state.activePlayer);
+            let temCards = this.state.myCards;
+            temCards.splice(temCards.indexOf(card), 1)
+            this.setState({ myCards: temCards, turn: false });
         }
-        else{return;}
+        else if(this.state.turn && !this.state.rangSelected) { socket.emit('RangSelected',card.name)
+    socket.on('RangDone',rangSelected=>{
+        this.setState({rangSelected:rangSelected})
+    }) }
     }
 
 
@@ -65,9 +70,9 @@ export default class Playarea extends Component {
 
         );
         socket.emit("Requesttojoinroom", this.state.identity);
-        socket.on('Youjoined', (identity, users) => {
+         socket.on('Youjoined', (identity, users) => {
             console.log(users);
-            this.setState({
+             this.setState({
                 players: identity.totalPlayers,
                 showRoom: identity.showRoom,
                 allUsers: users,
@@ -75,7 +80,7 @@ export default class Playarea extends Component {
                 activePlayer: identity.totalPlayers,
 
             });
-
+            
         }
 
 
@@ -93,23 +98,30 @@ export default class Playarea extends Component {
             console.log(player);
         }
         )
-        socket.on('yourCards', (cards,turn) => {
+        socket.on('yourCards', (cards, turn) => {
             console.log(cards);
-            this.setState({ myCards: cards, turn:turn })
+            if(this.state.activePlayer===1){
+            this.setState({ myCards: cards, turn: turn, rangSelected:false })
+            }else{
+                this.setState({ myCards: cards, turn: turn })
+ 
+            }
         })
         socket.on('cardPlayedBy', (card, position) => {
 
             this.displayPlayedCards(card, position);
         })
-        socket.on('nextTurn',turn=>{this.setState({turn:turn})})
-        socket.on('yourTurn',turn=>{
+        socket.on('nextTurn', turn => { this.setState({ turn: turn }) })
+        socket.on('yourTurn', turn => {
             console.log("your turn function")
-            
-            this.setState({turn:turn})})
-    
+
+            this.setState({ turn: turn })
+        })
+
 
 
     }
+
     displayPlayedCards(card, by) {
         switch (by) {
             case 1:
@@ -202,38 +214,44 @@ export default class Playarea extends Component {
                 console.log(showRoom);
             }
             )
-            socket.on('yourCards', (cards,turn) => {
+            socket.on('yourCards', (cards, turn) => {
                 console.log(cards);
-                this.setState({ myCards: cards,turn:turn })
+                this.setState({ myCards: cards, turn: turn })
             })
 
             socket.on('cardPlayedBy', (card, position) => {
                 this.displayPlayedCards(card, position);
 
             })
-            socket.on('nextTurn',turn=>{
+            socket.on('nextTurn', turn => {
                 console.log("next turn function")
-                this.setState({turn:turn})})
-            socket.on('yourTurn',turn=>{
+                this.setState({ turn: turn })
+            })
+            socket.on('yourTurn', turn => {
                 console.log("your turn function")
-                
-                this.setState({turn:turn})})
+
+                this.setState({ turn: turn })
+            })
         }
 
     }
 
     render() {
-
-        const showCards = this.state.myCards.map((card) =>
-
-            <div class="card" onClick={() => { this.playCard(card) }}>
+        const shoCards = this.state.myCards.map((card) =>
+        
+        <div class="card" onClick={() => { this.playCard(card) }}>
                 <div class="value" card-value={card.value}>{card.title}
                 </div>
                 <div className={card.class}>
                 </div>
             </div>
         );
-
+        if(this.state.activePlayer===1 && !this.state.rangSelected){
+            showCards=[shoCards[0],shoCards[1],shoCards[2],shoCards[3],shoCards[4]]
+        }
+        else
+          { showCards=shoCards}
+        
         return (
             <div>
 
