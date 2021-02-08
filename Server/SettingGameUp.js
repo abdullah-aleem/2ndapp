@@ -57,6 +57,21 @@ exports.startGame = function (players, io, socket) {
 
 
         const shuffled = Tcards.sort(() => 0.5 - Math.random());
+        if(shuffled[0].value<11){
+        if(shuffled[1].value<11){
+        if(shuffled[2].value<11){
+        if(shuffled[3].value<11){
+        if(shuffled[4].value<11){
+distributingCards(players, io, socket)
+        }
+
+        }
+
+        }
+ 
+        }
+
+        }
         io.to(players[0].id).emit('yourCards', shuffled.slice(0, 13),true);
         io.to(players[1].id).emit('yourCards', shuffled.slice(13, 26),false);
         io.to(players[2].id).emit('yourCards', shuffled.slice(26, 39),false);

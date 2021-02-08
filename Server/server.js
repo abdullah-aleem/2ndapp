@@ -20,6 +20,13 @@ var x;
 var rang;
 var noRangCard = true;
 var sameCards;
+var setRound = 1;
+var round = 1;
+var roundWonByPlayer1 = 0;
+var roundWonByPlayer2 = 0;
+var roundWonByPlayer3 = 0;
+var roundWonByPlayer4 = 0;
+var previuousRoundWinner = null;
 io.on("connection", (socket) => {
 
 
@@ -103,18 +110,22 @@ io.on("connection", (socket) => {
         console.log('next turn is of ', nextTurn)
 
         let rangCards = currentcards.map((x) => { if (x.name === rang) { return x } });
-        console.log('rang Cards', rangCards);
-        for (x in rangCards) {
+        
+        for (x of rangCards) {
+          console.log(x);
           if (x) {
-            noRangCard == false
-             sameCards = rangCards
+            noRangCard = false
+            sameCards = rangCards
+        console.log(sameCards)
           }
 
         }
-        if (!noRangCard) {
+        if (noRangCard) {
           sameCards = currentcards.map((x) => { if (x.name === currentcards[nextTurn].name) { return x } });
           console.log('sameCards', sameCards);
+
         }
+        noRangCard = true;
         temp = -10;
         for (x of sameCards) {
           if (x) {
@@ -132,9 +143,94 @@ io.on("connection", (socket) => {
           // console.log(temp);
         }
         nextTurn = winner.position - 1;
+        if (round == 2 && previuousRoundWinner == winner) {
+          console.log('in here 147')
+          
+          round++;
+          setRound++;
+        }
+
+        else if (previuousRoundWinner == winner) {
+          console.log('in here 152')
+          round++;
+          switch (winner.position) {
+            case 1:
+              roundWonByPlayer1 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            case 2:
+              roundWonByPlayer2 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            case 3:
+              roundWonByPlayer3 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            case 4:
+              roundWonByPlayer4 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            default:
+              break;
+          }
+
+        }
+        else if (!previuousRoundWinner) {
+          console.log('in here 184')
+          previuousRoundWinner = winner;
+          round++;
+          setRound++;
+        }
+        else if (previuousRoundWinner != winner && round == 12) {
+          console.log('in here 190')
+          previuousRoundWinner = null;
+          round++;
+          setRound++;
+          switch (winner.positon) {
+            case 1:
+              roundWonByPlayer1 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            case 2:
+              roundWonByPlayer2 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            case 3:
+              roundWonByPlayer3 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            case 4:
+              roundWonByPlayer4 = setRound;
+              previuousRoundWinner = null;
+              setRound = 0;
+              break;
+            default:
+              break;
+          }
+        }
+        else if (previuousRoundWinner != winner) {
+          console.log('in here 220')
+          previuousRoundWinner == winner;
+          round++;
+          setRound++;
+        }
         socket.to(data.sendcode).emit('nextTurn', false);
         io.in(currentUsers[nextTurn].id).emit('yourTurn', true)
         currentcards = [];
+        console.log('round won by player 1', roundWonByPlayer1);
+        console.log('round won by player 2', roundWonByPlayer2);
+        console.log('round won by player 3', roundWonByPlayer3);
+        console.log('round won by player 4', roundWonByPlayer4);
+        console.log('round is now', round);
+        console.log('prevous round was won by',previuousRoundWinner);
+
       }
 
 
